@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title class="title-banker">Banker's Algorithm Simulator</title>
+    <div class="logo">
+      <img src="https://play-lh.googleusercontent.com/AUpgW_t6uDB6Dzi8pLk89cLihZAcLzJSRCyWzXa68WuEUsTPY8CSBO0IcDVFPTCza9k" alt="Logo">
+    </div>
+    <style type="text/css">
+/**Thiết lập css về căn chỉnh, font, hình ảnh, giao diện cho chương trình**/
+.logo {
+  position: absolute;
+  top: 10;
+  left: 0;
+  z-index: 100;
+  margin-left: 30px;
+}
+.wrapper p {
+			color: rgb(179, 14, 45);
+      text-align: center;
+
+		}
+
+.logo img {
+  display: block;
+  max-width: 24%;
+  max-height: 24%;
+}
+body{
+ 
+  height:100%;
+  width:99%;
+  font-size: 20px;
+  text-align: center;
+ 
+}
+.wrapper{
+  font-weight: bolder;
+}
+
+.title-banker{
+  font-size: 40px;
+  color: white;
+}
+
+.btn_reset{
+  background-color: red;
+  color: white;
+  
+  border-color: rgb(92, 6, 6);
+}
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 48px;
+}
+
+button {
+  border-color: rgb(255, 210, 8);
+  padding: 7px;
+  border-radius: 20px;
+  font-size: 20px;
+  font-family: Times New Roman;
+  background-color: rgb(255, 233, 89);
+  color: rgb(3, 99, 69);
+  margin-bottom: 20px;
+}
+
+.container p {
+			margin: 0;
+      justify-content: center;
+      display: block;
+
+		}
+
+td, th{
+  padding: 2 px;
+  background-color: rgb(114, 255, 147);
+  padding-left: 4px;
+  text-align: center;
+}
+
+input{
+  padding: 8px;
+  border-radius: 15px;
+  border-color: rgb(7, 91, 7);
+  text-align: center;
+  padding-bottom: 15px;
+  font-size: 20px;
+  color: rgb(3, 136, 94);
+  font-family: Times New Roman;
+  
+}
+
+.input2{
+  display: inline-block;
+
+  padding: 10px;
+  border-radius: 15px;
+  border-color: black;
+  text-align: center;
+  padding-bottom: 15px;
+ 
+  width: 5%;
+  font-size: 15px;
+}
+
+.wrapper{
+  padding:10px;
+}
+
+.tables{
+  padding-bottom:10%;
+  margin-bottom: 10px;
+  border-spacing: 15px 20px;
+}
+
+.allocation{
+  width:25%;
+  float:left;
+}
+
+.max{
+  width:25%;
+  float:left;
+}
+.container {
+  display: flex;
+}
+
+.seq, .comparison {
+  text-align: left;
+  flex-grow: 1;
+  color: rgba(201, 0, 0, 0.735); 
+  font-size: 27px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.bold {
+  font-weight: bold;
+}
+.need{
+  width:25%;
+  float:left;
+}
+
+.available{
+  width:25%;
+  float:left ;
+}
+
+.input{
+  padding:20px;
+}
+
+.seq{
+
+  margin-bottom: 10px
+}
+
+.comparison{
+  padding-top: 3%;
+  padding-left: 7%;
+}
+
+.cname{
+  color: white;
+  text-decoration: none;
+}
+
+.cname:hover{
+  color:black;
+  font-size: 24px;
+}
+/**Function kiểm tra giá trị đuợc nhập vào và đưa thông báo nếu nhập sai**/
+    </style>
+
+    <script>
+    
+        function validation(){
+  var a = document.getElementById('resourceA').value;
+  var b = document.getElementById('resourceB').value;
+  var c = document.getElementById('resourceC').value;
+  if( a=='' || a<0 || b=='' || b<0 || c=='' || c<0){
+    alert("Số lượng của vé không thể là âm hoặc trống");
+  }
+  for(var i=1; i<=5; i++){
+    for(var j=1; j<=3; j++){
+      if(document.getElementById('a'+i+j).value<0 || document.getElementById('a'+i+j).value==''){
+        alert("Thành phần của ma trận Allocation không thể là âm hoặc trống");
+      }
+      if(document.getElementById('m'+i+j).value<0 || document.getElementById('m'+i+j).value==''){
+        alert("Thành phần của ma trận Max không thể là âm hoặc trống");
+      }
+    }
+    document.getElementById('calc'+i).value = '';
+  }
+  document.getElementById('calc0').value = '';
+}
+
+/*Function sử dụng vòng lặp để thực hiện tính toán các ma trận*/
+
+function reset(){
+  document.getElementById('resourceA').value = '';
+  document.getElementById('resourceB').value = '';
+  document.getElementById('resourceC').value = '';
+  for(var i=1; i<=5; i++){
+    for(var j=1; j<=3; j++){
+      document.getElementById('a'+i+j).value='';
+      document.getElementById('m'+i+j).value='';
+      document.getElementById('n'+i+j).value='';
+    }
+    document.getElementById('p'+i).value = ''
+    document.getElementById('calc'+i).innerHTML = '';
+  }
+  document.getElementById('av11').value = '';
+  document.getElementById('av12').value = '';
+  document.getElementById('av13').value = '';
+  document.getElementById('calc0').innerHTML = '';
+}
+
+/*Function với ma trận ví dụ cho người dùng*/
+
+function sample(){
+  sam = [[1,0,0],
+        [0,1,0],
+        [1,0,0],
+        [0,0,0],
+        [0,0,0]];
+
+  max = [[2,1,0],
+        [1,2,0],
+        [1,1,0],
+        [0,0,0],
+        [0,0,0]];
+  for(var i=1; i<=5; i++){
+    for(var j=1; j<=3; j++){
+      document.getElementById('a'+i+j).value = sam[i-1][j-1];
+      document.getElementById('m'+i+j).value = max[i-1][j-1];
+    }
+  }
+  document.getElementById('resourceA').value = 0;
+  document.getElementById('resourceB').value = 0;
+  document.getElementById('resourceC').value = 0;
+  document.getElementById('av11').value = 2;
+  document.getElementById('av12').value = 1;
+  document.getElementById('av13').value = 0;
+  document.getElementById('calc0').innerHTML = ' Ví dụ đang được tải lên...';
+}
+
+/*Fuction tìm ma trận available*/
+function find_avai(){
+  var a = document.getElementById('resourceA').value;
+  var b = document.getElementById('resourceB').value;
+  var c = document.getElementById('resourceC').value;
+  var x = 0;
+  var y = 0;
+  var z = 0;
+  document.getElementById('calc1').innerHTML = '&nbsp Tính toán ma trận Available....'+'<br/>'+'Available[n] = Tổng số vé (vốn)- (Allocation[0][n] + Allocation[1][n] + Allocation[2][n] + Allocation[3][n] + Allocation[4][n])'+'<br/>';
+  document.getElementById('calc1').innerHTML += 'Available[0] = '+a+' - ';
+  document.getElementById('calc2').innerHTML = 'Available[1] = '+b+' - ';
+  document.getElementById('calc3').innerHTML = 'Available[2] = '+c+' - ';
+  for(var i=1; i<=5; i++){
+      var x = x + parseInt(document.getElementById('a'+i+'1').value);
+      document.getElementById('calc1').innerHTML += parseInt(document.getElementById('a'+i+'1').value); if(i<5){document.getElementById('calc1').innerHTML += '+';}else{document.getElementById('calc1').innerHTML += ' = '}
+      var y = y + parseInt(document.getElementById('a'+i+'2').value);
+      document.getElementById('calc2').innerHTML += parseInt(document.getElementById('a'+i+'1').value); if(i<5){document.getElementById('calc2').innerHTML += '+';}else{document.getElementById('calc2').innerHTML += ' = '}
+      var z = z + parseInt(document.getElementById('a'+i+'3').value);
+      document.getElementById('calc3').innerHTML += parseInt(document.getElementById('a'+i+'1').value); if(i<5){document.getElementById('calc3').innerHTML += '+';}else{document.getElementById('calc3').innerHTML += ' = '}
+  }
+  document.getElementById('av11').value = a-x;
+  document.getElementById('calc1').innerHTML += a-x;
+  document.getElementById('av12').value = b-y;
+  document.getElementById('calc2').innerHTML += b-y;
+  document.getElementById('av13').value = c-z;
+  document.getElementById('calc3').innerHTML += c-z;
+  document.getElementById('calc4').innerHTML = '';
+  document.getElementById('calc5').innerHTML = '';
+  document.getElementById('calc0').innerHTML = '';
+  validation();
+}
+
+function find_need(){
+
+ 
+  document.getElementById('calc1').innerHTML = '&nbsp Tính ma trận Need....'+'<br/>'+'Need[n][n] = Max[n][n] - Allocation[n][n]'+'<br/>';
+  document.getElementById('calc2').innerHTML = '';
+  document.getElementById('calc3').innerHTML = '';
+  document.getElementById('calc4').innerHTML = '';
+  document.getElementById('calc5').innerHTML = '';
+  document.getElementById('calc0').innerHTML = '';
+  for(var i=1; i<=5; i++){
+    for(var j=1; j<=3; j++){
+      document.getElementById('n'+i+j).value = parseInt(document.getElementById('m'+i+j).value) - parseInt(document.getElementById('a'+i+j).value);
+      document.getElementById('calc'+i).innerHTML += 'Need['+(i-1)+']'+'['+(j-1)+']'+' = '+document.getElementById('m'+i+j).value + ' - ' + document.getElementById('a'+i+j).value+' = '+document.getElementById('n'+i+j).value+'&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp';
+    }
+  }
+}
+
+/**Function tìm quy trình tối ưu để đưa thông báo deadlock**/
+
+function find_sequence(){
+  // find_avai();
+  // find_need();
+  var dp = 0;
+  var checker = 0;
+  var q = 1;
+  var k=1;
+  document.getElementById('calc0').innerHTML = '&nbsp Tính quy trình tối ưu nhất....'+'<br/>';
+  for(var j=1; j<=5; j++){
+    x1 = parseInt(document.getElementById('av11').value);
+    x2 = parseInt(document.getElementById('av12').value);
+    x3 = parseInt(document.getElementById('av13').value);
+    document.getElementById('calc'+j).innerHTML = 'Bước'+j+':&nbsp&nbsp'+' Ma trận Available= '+x1+', '+x2+', '+x3;
+    for(var i=k; i<=5; i++){
+      var ex1 = parseInt(document.getElementById('a'+i+'1').value);
+      var ex2 = parseInt(document.getElementById('a'+i+'2').value);
+      var ex3 = parseInt(document.getElementById('a'+i+'3').value);
+      if(ex1!= 0 || ex2!= 0 || ex3!= 0){
+        if(x1 >= parseInt(document.getElementById('n'+i+'1').value) && x2 >= parseInt(document.getElementById('n'+i+'2').value) && x3 >= parseInt(document.getElementById('n'+i+'3').value)){
+          document.getElementById('p'+q).value = 'Khách '+i;
+          document.getElementById('calc'+j).innerHTML += '&nbsp&nbsp so sánh với ma trận Need['+(i)+'] = ( '+document.getElementById('n'+i+'1').value+', '+document.getElementById('n'+i+'2').value+', '
+          +document.getElementById('n'+i+'3').value+' ) ta thấy < Available = ( '+x1+', '+x2+', '+x3
+          +' ) => Khách '+i+' được chọn. Và ma trận Available mới là ( '+document.getElementById('av11').value+', '+document.getElementById('av12').value+', '+document.getElementById('av13').value+' ) + ( '+document.getElementById('a'+i+'1').value+', '+document.getElementById('a'+i+'2').value+', '
+          +document.getElementById('a'+i+'3').value+' ) = ';
+          document.getElementById('av11').value = parseInt(document.getElementById('av11').value) + parseInt(document.getElementById('a'+i+'1').value);
+          document.getElementById('av12').value = parseInt(document.getElementById('av12').value) + parseInt(document.getElementById('a'+i+'2').value);
+          document.getElementById('av13').value = parseInt(document.getElementById('av13').value) + parseInt(document.getElementById('a'+i+'3').value);
+          document.getElementById('calc'+j).innerHTML += '( '+document.getElementById('av11').value+', '+document.getElementById('av12').value+', '+document.getElementById('av13').value+' )';
+          document.getElementById('a'+i+'1').value = '0';
+          document.getElementById('a'+i+'2').value = '0';
+          document.getElementById('a'+i+'3').value = '0';
+          k=i+1;
+          if (k==6){
+            k=1;
+          }
+          q = q + 1;
+          checker = checker + 1;
+          break;
+        }
+        else{
+          dp = i;
+        }
+      }
+    }
+  }
+  if(checker == 0){
+    alert("Deadlock!!");
+    reset();
+  }
+}
+/**Thiết lập giao diện các nội dung cần thiết khi nhập liệu**/
+    </script>
+  </head>
+  <body>
+    <div class="wrapper", style="color:rgb(25, 123, 122)";
+      <center><h2 >TỐI ƯU HÓA QUY TRÌNH MUA VÉ TRÊN ỨNG DỤNG TICKEBOX</h2>
+        
+        <p>Hướng dẫn: Nhập số lượng vé vào các ma trận tương ứng, trường hợp 
+          <br>không có cần
+          nhập giá trị "0", không được bỏ trống vị trí các ma trận.
+        </p>
+      <a class="cname" title="Creator" href="http://fsociety.co.in">lucifer</a></center>
+    </div>
+    <div class="input">
+      <center>
+      <!--Ma trận input số lượng vé còn available-->
+        Số lượng vé ban đầu (D): &nbsp<input type="text" id="resourceA" size="2" maxlength="2"/>&nbsp&nbsp&nbsp
+        Số lượng vé ban đầu (N): &nbsp<input type="text" id="resourceB" size="2" maxlength="2"/>&nbsp&nbsp&nbsp
+        Số lượng vé ban đầu (Khác): &nbsp<input type="text" id="resourceC" size="2" maxlength="2"/>&nbsp&nbsp&nbsp
+      </center>
+    </div>
+    <div class="tables">
+      <center>
+      <!--Ma trận input nhập số lượng vé allocation-->
+        <div class="allocation">
+          <table border="2">
+            <tr>
+              <th colspan="4 " style="background-color: rgb(40, 213, 155);">Vé khách giữ (Allocation)</th>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Vé D</td>
+              <td>Vé N</td>
+              <td>Vé khác</td>
+            </tr>
+            <tr>
+              <td>Khách 1</td>
+              <td><input id="a11" size="2" maxlength="2"/></td>
+              <td><input id="a12" size="2" maxlength="2"/></td>
+              <td><input id="a13" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 2</td>
+              <td><input id="a21" size="2" maxlength="2"/></td>
+              <td><input id="a22" size="2" maxlength="2"/></td>
+              <td><input id="a23" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 3</td>
+              <td><input id="a31" size="2" maxlength="2"/></td>
+              <td><input id="a32" size="2" maxlength="2"/></td>
+              <td><input id="a33" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 4</td>
+              <td><input id="a41" size="2" maxlength="2"/></td>
+              <td><input id="a42" size="2" maxlength="2"/></td>
+              <td><input id="a43" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 5</td>
+              <td><input id="a51" size="2" maxlength="2"/></td>
+              <td><input id="a52" size="2" maxlength="2"/></td>
+              <td><input id="a53" size="2" maxlength="2"/></td>
+            </tr>
+          </table>
+        </div>
+      <!--Ma trận input số lượng vé muốn mua của khách (Max)-->
+        <div class="max">
+          <table border="2">
+            <tr>
+              <th colspan="4" style="background-color: rgb(40, 213, 155);">Vé khách muốn mua (Max)</th>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Vé D</td>
+              <td>Vé N</td>
+              <td>Vé khác</td>
+            </tr>
+            <tr>
+              <td>Khách 1</td>
+              <td><input id="m11" size="2" maxlength="2"/></td>
+              <td><input id="m12" size="2" maxlength="2"/></td>
+              <td><input id="m13" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 2</td>
+              <td><input id="m21" size="2" maxlength="2"/></td>
+              <td><input id="m22" size="2" maxlength="2"/></td>
+              <td><input id="m23" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 3</td>
+              <td><input id="m31" size="2" maxlength="2"/></td>
+              <td><input id="m32" size="2" maxlength="2"/></td>
+              <td><input id="m33" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 4</td>
+              <td><input id="m41" size="2" maxlength="2"/></td>
+              <td><input id="m42" size="2" maxlength="2"/></td>
+              <td><input id="m43" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 5</td>
+              <td><input id="m51" size="2" maxlength="2"/></td>
+              <td><input id="m52" size="2" maxlength="2"/></td>
+              <td><input id="m53" size="2" maxlength="2"/></td>
+            </tr>
+          </table>
+        </div>
+        <!--Trả về ma trận số lượng vé cần bổ sung (Need)-->
+        <div class="need">
+          <table border="2">
+            <tr>
+              <th colspan="4" style="background-color: rgb(40, 213, 155);">Số lượng vé cần bổ sung (Need)</th>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Vé D</td>
+              <td>Vé N</td>
+              <td>Vé khác</td>
+            </tr>
+            <tr>
+              <td>Khách 1</td>
+              <td><input id="n11" size="2" maxlength="2"/></td>
+              <td><input id="n12" size="2" maxlength="2"/></td>
+              <td><input id="n13" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 2</td>
+              <td><input id="n21" size="2" maxlength="2"/></td>
+              <td><input id="n22" size="2" maxlength="2"/></td>
+              <td><input id="n23" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 3</td>
+              <td><input id="n31" size="2" maxlength="2"/></td>
+              <td><input id="n32" size="2" maxlength="2"/></td>
+              <td><input id="n33" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 4</td>
+              <td><input id="n41" size="2" maxlength="2"/></td>
+              <td><input id="n42" size="2" maxlength="2"/></td>
+              <td><input id="n43" size="2" maxlength="2"/></td>
+            </tr>
+            <tr>
+              <td>Khách 5</td>
+              <td><input id="n51" size="2" maxlength="2"/></td>
+              <td><input id="n52" size="2" maxlength="2"/></td>
+              <td><input id="n53" size="2" maxlength="2"/></td>
+            </tr>
+          </table>
+        </div>
+        <div class="button-container">
+          <span>
+          <!--Nút đưa ví dụ (hướng dẫn mẫu cho người chưa biết dùng chương trinh)-->
+          <button type="input2" name="sam" onclick="sample()">Tải ví dụ</button>
+               <!--Nút reset lại chương trình-->
+               <button type="input2" name="reset" class="btn_reset" onclick="reset()">Đặt lại</button>
+              </span>
+              
+          <!--Nút tìm ma trận số lượng vé còn lại (tối ưu nhất cho trường hợp dự trù số vé trong tương lai)-->
+          <button type="input2" name="avai" onclick="find_avai()">Tìm ma trận Available</button>
+          <!--Nút tìm số lượng vé cần bổ sung-->
+          <button type="input2" name="need" onclick="find_need()">Tìm ma trận Need</button>
+          <!--Nút tìm ra quy trình cấp vé phù hợp nhất cho khách hàng-->
+          <button type="input2" name="seq" onclick="find_sequence()">Tìm quy trình tối ưu nhất</button>
+     
+        </div>
+        <div class="available">
+        
+          <table border="2">
+            <tr>
+              <th colspan="3" style="background-color: rgb(40, 213, 155);">Số vé còn lại (Available)</th>
+            </tr>
+            <tr>
+              <td>Vé D</td>
+              <td>Vé N</td>
+              <td>Vé khác</td>
+            </tr>
+            <tr>
+              <td><input id="av11" size="2" maxlength="2"/></td>
+              <td><input id="av12" size="2" maxlength="2"/></td>
+              <td><input id="av13" size="2" maxlength="2"/></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+</center>
+<div class="seq">
+  <!--Thông báo thứ tự quy trình cấp vé tối ưu-->
+  <center>
+
+    <span class="bold">
+   
+      Quy trình bán vé tối ưu:
+      
+    </span>
+    <input class="input2" id="p1" size="2" maxlength="6"/>
+    <input class="input2" id="p2" size="2" maxlength="6"/>
+    <input class="input2" id="p3" size="2" maxlength="6"/>
+    <input class="input2" id="p4" size="2" maxlength="6"/>
+    <input class="input2" id="p5" size="2" maxlength="6"/>
+  </center>
+
+<div class="comparison">
+  <center>
+    <!--Chi tiết tính toán cho quy trình cấp vé-->
+    <span class="bold">Chi tiết tính toán:</span>
+    <span id="calc0"></span>
+    <span id="calc1"></span><br/>
+    <span id="calc2"></span><br/>
+    <span id="calc3"></span><br/>
+    <span id="calc4"></span><br/>
+    <span id="calc5"></span>
+  </center>
+</div>
+</div>
+<div class="creator">
+</div>
+  </body>
+</html>
